@@ -1,0 +1,45 @@
+{
+  "name": "ejusticebharat-server",
+  "version": "1.0.0",
+  "description": "An E-portal for pretrail of various types of cases",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest",
+    "dev": "nodemon node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mr-Yash-beldar/E-Justice_Bharat.git"
+  },
+  "keywords": [
+    "justice",
+    "eportal",
+    "mern",
+    "node",
+    "express",
+    "advocate",
+    "litigant",
+    "react"
+  ],
+  "author": "Yashodip Beldar",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/Mr-Yash-beldar/E-Justice_Bharat/issues"
+  },
+  "homepage": "https://github.com/Mr-Yash-beldar/E-Justice_Bharat#readme",
+  "dependencies": {
+    "argon2": "^0.41.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-validator": "^7.2.0",
+    "faker": "^5.5.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.6.0",
+    "nodemon": "^3.1.4",
+    "validator": "^13.12.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  }
+}
