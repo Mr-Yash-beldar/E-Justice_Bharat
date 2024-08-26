@@ -1,0 +1,39 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build files
+build/
+dist/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Debugging
+.vscode/
+.idea/
+
+# Optional npm cache directory
+.npm/
+
+# Optional eslint cache
+.eslintcache
+
+# Coverage directory used by testing frameworks
+coverage/
+
+# TypeScript build artifacts
+*.tsbuildinfo
