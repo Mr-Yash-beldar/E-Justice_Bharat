@@ -1,6 +1,7 @@
 
 const mongoose = require('mongoose');
 const argon2 = require('argon2');
+const OTP = require('./otp'); // Import the OTP model
 
 const LitigantSchema = new mongoose.Schema({
     litigant_name: {
@@ -10,43 +11,34 @@ const LitigantSchema = new mongoose.Schema({
         get: (value)=> value.replace(/\b\w/g, (char) => char.toUpperCase())  // Capitalize the first letter of each word     
     },
     litigant_profile: {
-        type: String,
-        // required: true
+        type: String
     },
     litigant_state: {
-        type: String,
-        // required: true
+        type: String
     },
     litigant_district: {
-        type: String,
-        // required: true
+        type: String
     },
     litigant_gender: {
         type: String,
-        enum: ['Male', 'Female', 'Other'],
-        // required: true
+        enum: ['Male', 'Female', 'Other']
     },
     litigant_dob: {
-        type: Date,
-        // required: true
+        type: Date
     },
     litigant_mob: {
         type: String,
-        // required: true,
         match: /^[0-9]{10}$/  // for a 10-digit mobile number
     },
     litigant_email: {
         type: String,
-        // required: true,
         match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/  //  email  validation
     },
     litigant_lat: {
-        type: Number,
-        // required: true
+        type: Number
     },
     litigant_lang: {
-        type: Number,
-        // required: true
+        type: Number
     },
     litigant_password: {
         type: String,
@@ -54,29 +46,30 @@ const LitigantSchema = new mongoose.Schema({
         select:false // Do not include the password in the JSON response
     },
     litigant_passkey: {
-        type: String,
-        // required: true
+        type: String
     },
     litigant_otp: {
-        type: String,
-        // required: true
+        type: String
     },
     litigant_drivers_licence: {
-        type: String,
-        // required: true
+        type: String
     },
     litigant_aadhar_proof: {
-        type: String,
-        // required: true
+        type: String
     },
     litigant_contact_details: {
-        type: String,
-        // required: true
+        type: String
     },
     litigant_pincode: {
         type: String,
-        // required: true,
         match: /^[0-9]{6}$/  // for a 6-digit pincode
+    },
+    litigant_address: {
+        type: String
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true,  // Automatically adds createdAt and updatedAt timestamps
