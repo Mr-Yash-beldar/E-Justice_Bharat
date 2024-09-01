@@ -7,12 +7,10 @@ const otpSchema = new mongoose.Schema({
         ref: 'User'
     },
     otp: {
-        type: String,
-        required: true
+        type: String
     },
     expiresAt: {
-        type: Date,
-        required: true
+        type: Date
     }
 });
 
