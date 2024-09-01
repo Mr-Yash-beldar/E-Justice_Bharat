@@ -1,6 +1,7 @@
 const Litigant = require('../models/litigant');
 const argon2 = require('argon2'); // Import Argon2
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto'); // id encryption sathi use kel aahe
 const validator = require('validator'); // For validation
 
 // Add a new litigant (Signup)
@@ -24,7 +25,7 @@ const signup = async (req, res) => {
 
     await litigant.save();
     //send encrypted litigant_id in response
-    securedEncryptedId = crypto.createHash('sha256').update(litigant._id.toString()).digest('hex');
+    const securedEncryptedId = crypto.createHash('sha256').update(litigant._id.toString()).digest('hex');
     res.status(201).json({ message: 'Litigant registered successfully', securedEncryptedId });
   } catch (err) {
     res.status(500).json({ error: err.message });
