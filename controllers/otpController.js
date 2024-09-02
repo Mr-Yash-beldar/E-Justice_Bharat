@@ -1,30 +1,34 @@
-const Litigant = require('../models/litigant');
-const OTP = require('../models/OTP');
-const { generateOTP, sendVerificationEmail } = require('../utils/emailUtils');
 const crypto = require('crypto');
+const Litigant = require('../models/litigant');
+const OTP = require('../models/otp');
+const { generateOTP, sendVerificationEmail } = require('../utils/emailUtils');
+const {  decrypt } = require('../utils/encryptionUtils'); // assuming your utils file is named encryptionUtils.js
+
 
 const sendOtp = async (req, res) => {
     try {
-        const { litigant_email } = req.query;
+        const { id } = req.query;
 
-        // Find the user by email
-        const user = await Litigant.findOne({ litigant_email });
+        // Decrypt the user ID
+        const decryptedId = decrypt(id);
 
-        if (!user) {
+        // Find the user by decrypted ID
+        const litigant = await Litigant.findById(decryptedId);
+
+        if (!litigant) {
             return res.status(404).json({ error: 'User not found.' });
         }
 
-        if (user.isVerified) {
+        if (litigant.isVerified) {
             return res.status(400).json({ error: 'User is already verified.' });
         }
 
-        // Generate OTP and encrypted ID
+        // Generate OTP
         const otp = generateOTP();
-        const encryptedId = crypto.createHash('sha256').update(user._id.toString()).digest('hex');
 
         // Store the OTP in the database
         const newOtp = new OTP({
-            userId: user._id,
+            userId: litigant._id,
             otp,
             expiresAt: Date.now() + 10 * 60 * 1000 // 10 minutes from now
         });
@@ -33,7 +37,7 @@ const sendOtp = async (req, res) => {
 
         // Send the OTP via email with the HTML template
         const message = "Email Verification";
-        await sendVerificationEmail(litigant_email, otp, message);
+        await sendVerificationEmail(litigant.litigant_email, otp, message);
 
         res.status(200).json({ message: 'OTP sent successfully. Please check your email.' });
     } catch (err) {
@@ -41,4 +45,34 @@ const sendOtp = async (req, res) => {
     }
 };
 
-module.exports = { sendOtp };
+const verifyOtp = async (req, res) => {
+    try {
+        const { id, otp } = req.body;
+
+        // Decrypt the user ID
+        const decryptedId = decrypt(id);
+
+        // Find the OTP entry
+        const otpEntry = await OTP.findOne({ userId: decryptedId, otp });
+
+        if (!otpEntry) {
+            return res.status(400).json({ error: 'Invalid OTP.' });
+        }
+
+        if (Date.now() > otpEntry.expiresAt) {
+            return res.status(400).json({ error: 'OTP has expired.' });
+        }
+
+        // Mark the user as verified
+        await Litigant.findByIdAndUpdate(decryptedId, { isVerified: true });
+
+        // Optionally, delete the OTP entry from the database
+        await OTP.deleteOne({ _id: otpEntry._id });
+
+        res.status(200).json({ message: 'Email verified successfully.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+module.exports = { sendOtp, verifyOtp };
