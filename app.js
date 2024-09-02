@@ -3,6 +3,7 @@ require('dotenv').config(); // by this we can use .env file
 const express = require('express');
 const { connectDB, disconnectDB } = require('./config/db');  //database connection and disconnection
 const litigantRoutes = require('./routes/litigantRoutes'); // routes for litigants
+const otpRoutes = require('./routes/otpRoutes'); // routes for otp
 
 const app = express();
 app.use(express.urlencoded({ extended: false })); // Parse URL-encoded bodies
@@ -16,6 +17,7 @@ connectDB();
 
 // routes and middleware
 app.use('/litigants', litigantRoutes); // Use litigant routes
+app.use('/email', otpRoutes); // Use otp routes
 
 // for handling the error and sending the response to the client 
 process.on('SIGINT', async () => {
