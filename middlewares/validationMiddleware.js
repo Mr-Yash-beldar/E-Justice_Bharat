@@ -4,7 +4,7 @@ const validator = require('validator');
 // Validate signup data
 const validateSignup = (req, res, next) => {
   const { litigant_name, litigant_email, litigant_password, litigant_confirm_password, litigant_mob } = req.body;
-  console.log(req.body);
+  // console.log(req.body);
   // check if data is present or null
   if (!litigant_name || !litigant_email || !litigant_password || !litigant_confirm_password || !litigant_mob) {
     return res.status(400).json({ error: 'All fields are required' });
