@@ -42,8 +42,7 @@ const LitigantSchema = new mongoose.Schema({
     },
     litigant_password: {
         type: String,
-        required: true,
-        select:false // Do not include the password in the JSON response
+        required: true
     },
     litigant_passkey: {
         type: String
