@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { signup, completeProfile, authenticate, getLitigants, getLitigant } = require('../controllers/litigantController');
 const { validateSignup, validateProfile } = require('../middlewares/validationMiddleware');
-const authenticateJWT = require('../middlewares/authMiddleware');
+const authenticateJWT = require('../middlewares/authmiddleware');
 
 // Signup route
 router.post('/signup', validateSignup, signup);
