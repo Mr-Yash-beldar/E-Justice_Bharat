@@ -32,7 +32,9 @@ const LitigantSchema = new mongoose.Schema({
     },
     litigant_email: {
         type: String,
-        match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/  //  email  validation
+        match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,  //  email  validation
+        unique: true,
+        required: true
     },
     litigant_lat: {
         type: Number
@@ -50,13 +52,13 @@ const LitigantSchema = new mongoose.Schema({
     litigant_otp: {
         type: String
     },
-    litigant_drivers_licence: {
-        type: String
-    },
+    // litigant_drivers_licence: {
+    //     type: String
+    // },
     litigant_aadhar_proof: {
         type: String
     },
-    litigant_contact_details: {
+    litigant_other_document: {
         type: String
     },
     litigant_pincode: {
@@ -88,22 +90,25 @@ LitigantSchema.pre('save', async function(next) {
     next();
 });
 
+// Create OTP entry only for new litigants
 LitigantSchema.post('save', async function(doc) {
-    try {
+    if (doc.isNew) {
+        try {
+            // Create a new OTP entry
+            const otpEntry = new OTP({
+                userId: doc._id,
+                otp: null, // OTP will be generated later when requested
+                expiresAt: null // Expiry will be set when OTP is generated
+            });
 
-        // Create a new OTP entry
-        const otpEntry = new OTP({
-            userId: doc._id,
-            otp: null, // OTP will be generated later when requested
-            expiresAt: null // Expiry will be set when OTP is generated
-        });
-
-        await otpEntry.save();
-        console.log('OTP entry created successfully');
-    } catch (err) {
-        console.error('Error creating OTP entry:', err.message);
+            await otpEntry.save();
+            console.log('OTP entry created successfully');
+        } catch (err) {
+            console.error('Error creating OTP entry:', err.message);
+        }
     }
 });
+
 const Litigant = mongoose.model('Litigant', LitigantSchema);
 
 module.exports = Litigant;
