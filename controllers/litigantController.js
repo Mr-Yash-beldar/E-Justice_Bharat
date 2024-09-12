@@ -1,9 +1,15 @@
 const Litigant = require("../models/litigant");
-const argon2 = require("argon2"); // Import Argon2
-const jwt = require("jsonwebtoken");
+const jwtConfig = require('../config/jwtConfig');
+const argon2 = require("argon2"); // Import Argon2 basically pass encryption sathi use kartoy
+const multer = require("multer");
 const crypto = require("crypto"); // id encryption sathi use kel aahe
-const { encrypt } = require("../utils/encryptionUtils"); // assuming your utils file is named encryptionUtils.js
-const { log } = require("console");
+const { encrypt } = require("../utils/encryptionUtils");
+const { uploadImageToCloudinary } = require("../utils/cloudinaryUploader");
+
+
+// Configure multer to handle file uploads jo cloudinary la photo upload karnun deyil
+const storage = multer.memoryStorage();
+const upload = multer({ storage }).single("litigant_profile");
 
 // Add a new litigant (Signup)
 const signup = async (req, res) => {
@@ -19,7 +25,9 @@ const signup = async (req, res) => {
     // Check if user already exists
     const existingLitigant = await Litigant.findOne({ litigant_email });
     if (existingLitigant) {
-      return res.status(400).json({ error: "User already exists" });
+      console.log("existingLitigant", existingLitigant._id);
+      const securedId = encrypt(existingLitigant._id.toString());
+      return res.status(400).json({ error: "User already exists" ,id:securedId});
     }
 
     const litigant = new Litigant({
@@ -31,9 +39,7 @@ const signup = async (req, res) => {
 
     //send encrypted litigant_id in response
     const litigantId = litigant._id.toString();
-
     const securedEncryptedId = encrypt(litigantId);
-    console.log("secureid", securedEncryptedId);
 
     await litigant.save();
 
@@ -63,12 +69,17 @@ const authenticate = async (req, res) => {
     if (!litigant.isVerified) {
       return res.status(400).json({ message: "Email not verified." });
     }
+  
+    //  payload for the token which contains id and email
+    const payload = {
+      id: litigant._id,
+      email: litigant.litigant_email,
+    };
 
-    const token = jwt.sign(
-      { id: litigant._id, email: litigant.litigant_email },
-      process.env.JWT_SECRET,
-      { expiresIn: "24h" }
-    );
+    // Generate JWT token
+    const token = jwtConfig.signToken(payload);
+   
+    
 
     res.status(200).json({ token, litigant });
   } catch (err) {
@@ -76,9 +87,9 @@ const authenticate = async (req, res) => {
   }
 };
 
-// Complete profile of a litigant
+// Complete profile of a litigant basically update kara
 const completeProfile = async (req, res) => {
-  const { litigant_id } = req.user; // Assuming user ID is obtained from the JWT
+  const { litigant_id } = req.user; //jo  jwt token header madhe id ahe to extract kara
   const updates = req.body;
 
   try {
@@ -87,8 +98,23 @@ const completeProfile = async (req, res) => {
       return res.status(404).json({ error: "Litigant not found" });
     }
 
-    // Update only the fields provided in the request body
+    // jar photo file send keli asel tr cloudinary la upload kara
+    if (req.file) {
+      const result = await uploadImageToCloudinary(req.file.buffer, {
+        folder: "litigants",
+        public_id: `profile_${litigant_id}`,
+        overwrite: true,
+      });
+
+      litigant.litigant_profile = result.secure_url;
+    }
+
+    // Update other fields
     Object.keys(updates).forEach((key) => {
+      //if tries to update email show error cause email verification is dones
+      if (key === "litigant_email") {
+        return res.status(400).json({ error: "Email cannot be updated ,For further changes contact admin" });
+      }
       if (litigant[key] !== undefined) {
         litigant[key] = updates[key];
       }
@@ -101,19 +127,11 @@ const completeProfile = async (req, res) => {
   }
 };
 
-// Get all litigants
-const getLitigants = async (req, res) => {
-  try {
-    const litigants = await Litigant.find();
-    res.status(200).json(litigants);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
 // Get a specific litigant by ID or email
 const getLitigant = async (req, res) => {
-  const { id, email } = req.params;
+  // const { id, email } = req.params;
+  //verify the user jwt token hearder and extract the id from it
+  const { id, email } = req.user;
 
   try {
     let litigant;
@@ -141,6 +159,6 @@ module.exports = {
   signup,
   completeProfile,
   authenticate,
-  getLitigants,
   getLitigant,
+  upload,
 };
