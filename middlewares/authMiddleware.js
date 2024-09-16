@@ -1,16 +1,22 @@
-const jwt = require('jsonwebtoken');
+const jwtConfig = require('../config/jwtConfig');
 
-const authenticateJWT = (req, res, next) => {
+const authenticateJWT = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Extract token from Bearer scheme
 
-  if (token == null) return res.sendStatus(401); // If no token then return Unauthorized
+  if (!token) {
+    return res.status(401).json({ error: 'Token missing' }); // No token provided
+  }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403); // If token is invalid then return Forbidden
-    req.user = user;
-    next(); //all okay boys go to routes
-  });
+  try {
+    const decoded = await jwtConfig.verifyToken(token); // Verify token
+    req.user = decoded; // Attach decoded payload to request (e.g., litigant_id)
+    // console.log("decoded",decoded);
+    
+    next(); // Proceed to the next middleware/controller
+  } catch (error) {
+    return res.status(403).json({ error: 'Invalid or expired token' }); // Invalid token
+  }
 };
 
 module.exports = authenticateJWT;
