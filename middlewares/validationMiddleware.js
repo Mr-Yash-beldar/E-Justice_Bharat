@@ -23,17 +23,36 @@ const validateSignup = (req, res, next) => {
   next();
 };
 
-// Validate profile update data
+//validate profile update data
 const validateProfile = (req, res, next) => {
-  const { litigant_name, litigant_mob, litigant_pincode } = req.body;
+  const {
+    litigant_name,
+    litigant_mob,
+    litigant_pincode,
+    litigant_dob,
+  } = req.body;
 
-  if (litigant_mob && !validator.isMobilePhone(litigant_mob, 'any', { strictMode: false })) {
-    return res.status(400).json({ error: 'Invalid phone number format' });
+  // Validate litigant_name (ensure it's not empty and only contains letters)
+  if (litigant_name && !/^[a-zA-Z\s]+$/.test(litigant_name)) {
+    return res.status(400).json({ error: 'Invalid name format. Name should contain only letters and spaces.' });
   }
+
+  // Validate mobile number (must be 10 digits)
+  if (litigant_mob && (!validator.isMobilePhone(litigant_mob, 'any', { strictMode: false }) || litigant_mob.length !== 10)) {
+    return res.status(400).json({ error: 'Invalid mobile number. It must be a 10-digit number.' });
+  }
+
+  // Validate pincode (must be exactly 6 digits)
   if (litigant_pincode && !validator.matches(litigant_pincode, /^[0-9]{6}$/)) {
-    return res.status(400).json({ error: 'Invalid pincode format' });
+    return res.status(400).json({ error: 'Invalid pincode format. It must be a 6-digit number.' });
   }
 
+  // Validate date of birth (ensure it's a valid date and in the past)
+  if (litigant_dob && !validator.isDate(litigant_dob)) {
+    return res.status(400).json({ error: 'Invalid date of birth format.' });
+  }
+
+  // If all validations pass, proceed to the next middleware or route handler
   next();
 };
 
