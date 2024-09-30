@@ -3,6 +3,7 @@ const jwtConfig = require("../config/jwtConfig");
 const argon2 = require("argon2"); // Import Argon2 basically pass encryption sathi use kartoy
 const { encrypt } = require("../utils/encryptionUtils");
 const { handleFileUpload } = require("../utils/cloudinaryUploader");
+const id = require("faker/lib/locales/id_ID");
 // const { checkIfAadhaar } = require('../utils/AadharValidation/imagevalidate'); // Image validation utility
 
 // Add a new litigant (Signup)
@@ -19,11 +20,7 @@ const signup = async (req, res) => {
     // Check if user already exists
     const existingLitigant = await Litigant.findOne({ litigant_email });
     if (existingLitigant) {
-      console.log("existingLitigant", existingLitigant._id);
-      const securedId = encrypt(existingLitigant._id.toString());
-      return res
-        .status(400)
-        .json({ error: "User already exists", id: securedId });
+      return res.status(409).json({ error: "User already exists" });
     }
 
     const litigant = new Litigant({
@@ -32,18 +29,17 @@ const signup = async (req, res) => {
       litigant_password,
       litigant_mob,
     });
-
-    //send encrypted litigant_id in response
-    const litigantId = litigant._id.toString();
-    const securedEncryptedId = encrypt(litigantId);
+    // Encrypt the litigant ID
+    const securedEncryptedId = encrypt(litigant._id.toString());
 
     await litigant.save();
 
     res.status(201).json({
       message: "Litigant registered successfully",
-      securedEncryptedId,
+      id: securedEncryptedId, // Send the encrypted ID in the response
     });
   } catch (err) {
+    console.error("Error in signup function:", err.message);
     res.status(500).json({ error: err.message });
   }
 };
@@ -62,8 +58,12 @@ const authenticate = async (req, res) => {
     ) {
       return res.status(401).json({ message: "Invalid credentials." });
     }
-    if (!litigant.isVerified) {
-      return res.status(400).json({ message: "Email not verified." });
+    if (!litigant.isVerified) { 
+      const securedEncryptedId = encrypt(litigant.id.toString());
+      // console.log("securedEncryptedId", securedEncryptedId);
+      return res
+        .status(409)
+        .json({ message: "Email not verified.", id: securedEncryptedId });
     }
 
     //  payload for the token which contains id and email
@@ -208,7 +208,6 @@ const completeProfile = async (req, res) => {
   }
 };
 
-
 // Complete litigant profile
 // const completeProfile = async (req, res) => {
 //   const { litigant_id } = req.user; // Extract litigant ID from the JWT token
@@ -335,8 +334,6 @@ const completeProfile = async (req, res) => {
 //   }
 // };
 
-
-
 // const completeProfile = async (req, res) => {
 //   const { litigant_id } = req.user; // Extract litigant ID from the JWT token
 //   const updates = req.body; // Fields to update from the request body
@@ -398,7 +395,6 @@ const completeProfile = async (req, res) => {
 //     res.status(500).json({ error: "An error occurred while updating the profile. Please try again later." });
 //   }
 // };
-
 
 // Get a specific litigant by ID or email
 const getLitigant = async (req, res) => {
