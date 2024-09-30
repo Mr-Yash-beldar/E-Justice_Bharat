@@ -1,6 +1,6 @@
 const jwtConfig = require('../config/jwtConfig');
 
-const authenticateJWT = async (req, res, next) => {
+const authenticateLitigant = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Extract token from Bearer scheme
 
@@ -19,4 +19,4 @@ const authenticateJWT = async (req, res, next) => {
   }
 };
 
-module.exports = authenticateJWT;
+module.exports = authenticateLitigant;
