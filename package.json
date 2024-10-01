@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "jest",
+    "test:case": "jest case.test.js",
     "dev": "nodemon node index.js"
   },
   "repository": {
@@ -31,6 +32,7 @@
     "argon2": "^0.41.0",
     "axios": "^1.7.7",
     "cloudinary": "^2.4.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express": "^4.19.2",
