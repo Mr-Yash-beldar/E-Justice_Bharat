@@ -10,7 +10,7 @@ const LitigantSchema = new mongoose.Schema({
         set: (value)=> value.toLowerCase(), // Convert the name to lowercase before saving 
         get: (value)=> value.replace(/\b\w/g, (char) => char.toUpperCase())  // Capitalize the first letter of each word     
     },
-    litigant_profile: {
+    profile_image: {
         type: String
     },
     litigant_state: {
@@ -49,16 +49,16 @@ const LitigantSchema = new mongoose.Schema({
     litigant_passkey: {
         type: String
     },
-    litigant_otp: {
-        type: String
-    },
+    // litigant_otp: {
+    //     type: String
+    // },
     // litigant_drivers_licence: {
     //     type: String
     // },
-    litigant_aadhar_proof: {
+    aadhar_document: {
         type: String
     },
-    litigant_other_document: {
+    other_document: {
         type: String
     },
     litigant_pincode: {
