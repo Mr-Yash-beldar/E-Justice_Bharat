@@ -8,7 +8,7 @@ const {  decrypt } = require('../utils/encryptionUtils'); // assuming your utils
 const sendOtp = async (req, res) => {
     try {
         const { id } = req.query;
-
+           
         // Decrypt the user ID
         const decryptedId = decrypt(id);
 
@@ -25,6 +25,7 @@ const sendOtp = async (req, res) => {
 
         // Generate OTP
         const otp = generateOTP();
+        console.log(otp);
 
         // Store the OTP in the database
         const newOtp = new OTP({
