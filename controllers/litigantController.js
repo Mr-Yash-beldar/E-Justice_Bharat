@@ -4,6 +4,7 @@ const argon2 = require("argon2"); // Import Argon2 basically pass encryption sat
 const { encrypt } = require("../utils/encryptionUtils");
 const { handleFileUpload } = require("../utils/cloudinaryUploader");
 const id = require("faker/lib/locales/id_ID");
+const calculateLitigantProfileCompletion = require("../utils/LitigantProfile/CalculateProfile");
 // const { checkIfAadhaar } = require('../utils/AadharValidation/imagevalidate'); // Image validation utility
 
 // Add a new litigant (Signup)
@@ -208,194 +209,6 @@ const completeProfile = async (req, res) => {
   }
 };
 
-// Complete litigant profile
-// const completeProfile = async (req, res) => {
-//   const { litigant_id } = req.user; // Extract litigant ID from the JWT token
-//   const updates = req.body; // Fields to update from the request body
-
-//   try {
-//     // Find the litigant by ID
-//     const litigant = await Litigant.findById(litigant_id);
-//     if (!litigant) {
-//       return res.status(404).json({ error: "Litigant not found" });
-//     }
-
-//     const folderPath = `litigants/${litigant_id}`;
-
-//     // Check if files are uploaded
-//     if (req.files) {
-//       console.log("req.files", req.files);
-
-//       // List to hold all file upload promises
-//       const fileUploadPromises = [];
-
-//       // Handle profile image update
-//       if (req.files["profile"]) {
-//         const profileFile = req.files["profile"][0];
-
-//         // Validate file type for profile image (only accept images)
-//         if (!profileFile.mimetype.startsWith("image/")) {
-//           return res
-//             .status(400)
-//             .json({ error: "Invalid file type for profile image." });
-//         }
-
-//         // Upload new profile image
-//         fileUploadPromises.push(
-//           handleFileUpload(profileFile, folderPath, "profile")
-//             .then((url) => {
-//               litigant.litigant_profile = url; // Update litigant profile URL
-//             })
-//             .catch((err) => {
-//               throw new Error("Profile image upload failed.");
-//             })
-//         );
-//       }
-
-//       // Handle Aadhaar document update
-//       if (req.files["aadhar"]) {
-//         const aadharFile = req.files["aadhar"][0];
-
-//         // Validate file type for Aadhaar (accept only images or PDFs)
-//         if (
-//           !(
-//             aadharFile.mimetype.startsWith("image/") ||
-//             aadharFile.mimetype === "application/pdf"
-//           )
-//         ) {
-//           return res
-//             .status(400)
-//             .json({ error: "Invalid file type for Aadhaar document." });
-//         }
-
-//         // Upload new Aadhaar document
-//         fileUploadPromises.push(
-//           handleFileUpload(aadharFile, folderPath, "aadhar")
-//             .then((url) => {
-//               litigant.litigant_aadhar_proof = url; // Update litigant Aadhaar proof URL
-//             })
-//             .catch((err) => {
-//               throw new Error("Aadhaar document upload failed.");
-//             })
-//         );
-//       }
-
-//       // Handle other document update
-//       if (req.files["otherDocument"]) {
-//         const otherDocumentFile = req.files["otherDocument"][0];
-
-//         // Validate file type for other documents (only accept PDFs)
-//         if (otherDocumentFile.mimetype !== "application/pdf") {
-//           return res
-//             .status(400)
-//             .json({ error: "Invalid file type for other documents." });
-//         }
-
-//         // Upload new other document
-//         fileUploadPromises.push(
-//           handleFileUpload(otherDocumentFile, folderPath, "otherDocument")
-//             .then((url) => {
-//               litigant.litigant_other_document = url; // Update litigant other document URL
-//             })
-//             .catch((err) => {
-//               throw new Error("Other document upload failed.");
-//             })
-//         );
-//       }
-
-//       // Wait for all file uploads to complete
-//       await Promise.all(fileUploadPromises);
-//     }
-
-//     // Prevent updating the litigant email directly
-//     if (updates.litigant_email) {
-//       return res.status(400).json({
-//         error: "Email cannot be updated. For further changes, contact admin.",
-//       });
-//     }
-
-//     // Update other fields dynamically, except restricted fields like _id or litigant_email
-//     Object.keys(updates).forEach((key) => {
-//       if (key !== "_id" && key !== "litigant_email") {
-//         litigant[key] = updates[key];
-//       }
-//     });
-
-//     // Save the updated litigant profile
-//     await litigant.save();
-
-//     res.status(200).json({ message: "Profile updated successfully", litigant });
-//   } catch (err) {
-//     console.error("Error updating litigant profile:", err);
-//     res.status(500).json({
-//       error:
-//         "An error occurred while updating the profile. Please try again later.",
-//     });
-//   }
-// };
-
-// const completeProfile = async (req, res) => {
-//   const { litigant_id } = req.user; // Extract litigant ID from the JWT token
-//   const updates = req.body; // Fields to update from the request body
-
-//   try {
-//     // Find the litigant by ID
-//     const litigant = await Litigant.findById(litigant_id);
-//     if (!litigant) {
-//       return res.status(404).json({ error: "Litigant not found" });
-//     }
-
-//     // Handle profile image upload
-//     if (req.files && req.files.litigant_profile) {
-//       litigant.litigant_profile = await handleFileUpload(
-//         req.files.litigant_profile[0], // Get the first file for litigant_profile
-//         litigant_id,
-//         'profile'
-//       );
-//     }
-
-//     // Handle Aadhar proof upload
-//     if (req.files && req.files.litigant_aadhar_proof) {
-//       litigant.litigant_aadhar_proof = await handleFileUpload(
-//         req.files.litigant_aadhar_proof[0], // Get the first file for litigant_aadhar_proof
-//         litigant_id,
-//         'aadhar'
-//       );
-//     }
-
-//     // Handle other document upload
-//     if (req.files && req.files.other_document) {
-//       litigant.litigant_other_document = await handleFileUpload(
-//         req.files.other_document[0], // Get the first file for other_document
-//         litigant_id,
-//         'otherDocument'
-//       );
-//     }
-
-//     // Prevent updating the litigant email directly (requires admin intervention)
-//     if (updates.litigant_email) {
-//       return res.status(400).json({
-//         error: "Email cannot be updated. For further changes, contact admin.",
-//       });
-//     }
-
-//     // Update other fields dynamically
-//     Object.keys(updates).forEach((key) => {
-//       litigant[key] = updates[key];
-//     });
-
-//     // Save the updated litigant profile
-//     await litigant.save();
-
-//     // Send response after successful update
-//     res.status(200).json({ message: "Profile updated successfully", litigant });
-//   } catch (err) {
-//     // Handle errors in image upload or saving the litigant profile
-//     console.error("Error updating litigant profile:", err);
-//     res.status(500).json({ error: "An error occurred while updating the profile. Please try again later." });
-//   }
-// };
-
 // Get a specific litigant by ID or email
 const getLitigant = async (req, res) => {
   // const { id, email } = req.params;
@@ -418,7 +231,15 @@ const getLitigant = async (req, res) => {
       return res.status(404).json({ error: "Litigant not found" });
     }
 
-    res.status(200).json(litigant);
+    const completionPercentage = calculateLitigantProfileCompletion(litigant);
+    const profileStatus = completionPercentage === 100 ? 'completed' : 'not completed';
+
+    res.status(200).json({
+      message: "Litigant Details",
+      litigant,
+      completionPercentage,
+      profileStatus,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
