@@ -14,7 +14,7 @@ router.post('/signup', validateSignup, signup);
 router.post('/authenticate', authenticate);
 
 // Complete profile route
-router.post("/completeProfile", authenticateLitigant,validateProfile, uploadFields, completeProfile); // Assuming user is authenticated
+router.post("/completeProfile", authenticateLitigant,validateProfile, completeProfile); // Assuming user is authenticated
 
 // Get all litigants route
 // router.get('/litigants', authenticateLitigant, getLitigants); // Assuming authentication required
