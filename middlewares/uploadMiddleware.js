@@ -11,9 +11,9 @@ const upload = multer({
   
   // Middleware to handle single or multiple file uploads
   const uploadFields = upload.fields([
-    { name: 'profile', maxCount: 1 },
-    { name: 'aadhar', maxCount: 1 },
-    { name: 'otherDocument', maxCount: 1 },
+    { name: 'profile_image', maxCount: 1 },
+    { name: 'aadhar_document', maxCount: 1 },
+    { name: 'other_document', maxCount: 1 },
   ]);
 
 module.exports = uploadFields;
