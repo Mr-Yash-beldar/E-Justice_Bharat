@@ -6,6 +6,7 @@ const otpRoutes = require('./routes/otpRoutes'); // routes for otp
 const meetingRoutes = require("./routes/meetingRoutes"); //routes for meeting
 const caseRoutes = require('./routes/caseRoutes'); // routes for cases
 const authRoutes = require('./routes/authRoutes'); // routes for authentication
+const fileRoutes = require('./routes/fileRoutes'); // routes for file upload
 const cors = require('cors'); // Import cors
 const app = express();
 app.use(express.urlencoded({ extended: false })); // Parse URL-encoded bodies
@@ -30,6 +31,7 @@ app.use('/email', otpRoutes); // Use otp routes
 app.use("/ejusticeBharat/meeting", meetingRoutes); // Use meeting routes
 app.use('/cases', caseRoutes); // Use case routes
 app.use('/auth', authRoutes);
+app.use("/files", fileRoutes);
 
 // for handling the error and sending the response to the client 
 process.on('SIGINT', async () => {
@@ -41,9 +43,11 @@ process.on('SIGINT', async () => {
 app.get('/', (req, res) => {
   res.send('Welcome to eJustice Bharat');
 });
+
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 
 
 
