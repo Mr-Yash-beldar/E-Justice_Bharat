@@ -2,8 +2,6 @@ const Litigant = require("../models/litigant");
 const jwtConfig = require("../config/jwtConfig");
 const argon2 = require("argon2"); // Import Argon2 basically pass encryption sathi use kartoy
 const { encrypt } = require("../utils/encryptionUtils");
-const { handleFileUpload } = require("../utils/cloudinaryUploader");
-const id = require("faker/lib/locales/id_ID");
 const calculateLitigantProfileCompletion = require("../utils/LitigantProfile/CalculateProfile");
 // const { checkIfAadhaar } = require('../utils/AadharValidation/imagevalidate'); // Image validation utility
 
@@ -92,94 +90,6 @@ const completeProfile = async (req, res) => {
     const litigant = await Litigant.findById(litigant_id);
     if (!litigant) {
       return res.status(404).json({ error: "Litigant not found" });
-    }
-
-    const folderPath = `litigants/${litigant_id}`;
-
-    // Log req.files to check both files are being uploaded
-    console.log("req.files:", req.files);
-
-    // Check if files are uploaded
-    if (req.files) {
-      // Handle profile image update
-      if (req.files["profile"]) {
-        const profileFile = req.files["profile"][0];
-
-        // Validate file type for profile image (only accept images)
-        if (!profileFile.mimetype.startsWith("image/")) {
-          return res
-            .status(400)
-            .json({ error: "Invalid file type for profile image." });
-        }
-
-        // Upload new profile image
-        try {
-          litigant.litigant_profile = await handleFileUpload(
-            profileFile,
-            folderPath,
-            "profile"
-          );
-        } catch (err) {
-          return res
-            .status(500)
-            .json({ error: "Profile image upload failed." });
-        }
-      }
-
-      // Handle Aadhaar document update
-      if (req.files["aadhar"]) {
-        const aadharFile = req.files["aadhar"][0];
-
-        // Validate file type for Aadhaar (accept only images or PDFs)
-        if (
-          !(
-            aadharFile.mimetype.startsWith("image/") ||
-            aadharFile.mimetype === "application/pdf"
-          )
-        ) {
-          return res
-            .status(400)
-            .json({ error: "Invalid file type for Aadhaar document." });
-        }
-
-        // Upload new Aadhaar document
-        try {
-          litigant.litigant_aadhar_proof = await handleFileUpload(
-            aadharFile,
-            folderPath,
-            "aadhar"
-          );
-        } catch (err) {
-          return res
-            .status(500)
-            .json({ error: "Aadhaar document upload failed." });
-        }
-      }
-
-      // Handle other document update
-      if (req.files["otherDocument"]) {
-        const otherDocumentFile = req.files["otherDocument"][0];
-
-        // Validate file type for other documents (only accept PDFs)
-        if (otherDocumentFile.mimetype !== "application/pdf") {
-          return res
-            .status(400)
-            .json({ error: "Invalid file type for other documents." });
-        }
-
-        // Upload new other document
-        try {
-          litigant.litigant_other_document = await handleFileUpload(
-            otherDocumentFile,
-            folderPath,
-            "otherDocument"
-          );
-        } catch (err) {
-          return res
-            .status(500)
-            .json({ error: "Other document upload failed." });
-        }
-      }
     }
 
     // Prevent updating the litigant email directly
