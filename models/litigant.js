@@ -36,11 +36,17 @@ const LitigantSchema = new mongoose.Schema({
         unique: true,
         required: true
     },
-    litigant_lat: {
-        type: Number
-    },
-    litigant_lang: {
-        type: Number
+     // Update to GeoJSON format for location
+     location: {
+        type: {
+            type: String,
+            enum: ["Point"],
+            default: "Point"
+        },
+        coordinates: {
+            type: [Number],
+            required: true // Ensure coordinates are provided
+        }
     },
     litigant_password: {
         type: String,
@@ -49,12 +55,6 @@ const LitigantSchema = new mongoose.Schema({
     litigant_passkey: {
         type: String
     },
-    // litigant_otp: {
-    //     type: String
-    // },
-    // litigant_drivers_licence: {
-    //     type: String
-    // },
     aadhar_document: {
         type: String
     },
