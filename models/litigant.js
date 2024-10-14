@@ -37,7 +37,7 @@ const LitigantSchema = new mongoose.Schema({
         required: true
     },
      // Update to GeoJSON format for location
-     location: {
+     litigant_location: {
         type: {
             type: String,
             enum: ["Point"],
