@@ -101,14 +101,14 @@ const completeProfile = async (req, res) => {
 
     // Check for latitude and longitude in updates
     if (updates.litigant_lat !== undefined && updates.litigant_long !== undefined) {
-      litigant.location = {
+      litigant.litigant_location = {
         type: 'Point',
         coordinates: [updates.litigant_long, updates.litigant_lat] // [longitude, latitude]
       };
       delete updates.litigant_lat; // Remove lat from updates after processing
       delete updates.litigant_long; // Remove long from updates after processing
     }
-    
+
     // Update other fields dynamically, except restricted fields like _id or litigant_email
     Object.keys(updates).forEach((key) => {
       if (key !== "_id" && key !== "litigant_email") {
