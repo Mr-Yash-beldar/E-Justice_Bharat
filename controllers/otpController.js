@@ -25,7 +25,7 @@ const sendOtp = async (req, res) => {
 
         // Generate OTP
         const otp = generateOTP();
-        console.log(otp);
+        // console.log(otp);
 
         // Store the OTP in the database
         const newOtp = new OTP({
