@@ -24,7 +24,15 @@ const LitigantSchema = new mongoose.Schema({
         enum: ['Male', 'Female', 'Other']
     },
     litigant_dob: {
-        type: Date
+        type: Date,
+        set: function(value) {
+            // Expecting input in 'dd-mm-yyyy' format, convert it to Date object
+            const [day, month, year] = value.split('-').map(Number);
+            return new Date(year, month - 1, day);
+          },
+          get: function(value) {
+            return value ? formatDateToDDMMYYYY(value) : value;
+          }
     },
     litigant_mob: {
         type: String,
@@ -77,6 +85,14 @@ const LitigantSchema = new mongoose.Schema({
     toJSON: { getters: true }, // Ensure getters are applied when converting to JSON
     toObject: { getters: true } // Ensure getters are applied when converting to objects
 });
+
+//// Helper function to format date to 'dd-mm-yyyy'
+function formatDateToDDMMYYYY(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`;
+  }
 
 // Hash password before saving
 LitigantSchema.pre('save', async function(next) {
