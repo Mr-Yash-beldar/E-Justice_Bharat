@@ -26,8 +26,9 @@ const LitigantSchema = new mongoose.Schema({
     litigant_dob: {
         type: Date,
         set: function(value) {
+            // console.log('Setting date:', value);
             // Expecting input in 'dd-mm-yyyy' format, convert it to Date object
-            const [day, month, year] = value.split('-').map(Number);
+            const [year, month, day] = value.split('-').map(Number);
             return new Date(year, month - 1, day);
           },
           get: function(value) {
@@ -67,6 +68,9 @@ const LitigantSchema = new mongoose.Schema({
         type: String
     },
     other_document: {
+        type: String
+    },
+    litigant_preferred_language: {
         type: String
     },
     litigant_pincode: {
