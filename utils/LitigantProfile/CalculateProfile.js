@@ -14,6 +14,7 @@ const calculateLitigantProfileCompletion = (litigant) => {
         'litigant_password',
         'aadhar_document',
         'other_document',
+        'litigant_preferred_language',
         'litigant_pincode',
         'litigant_address',
     ];
