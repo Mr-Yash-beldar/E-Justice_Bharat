@@ -3,6 +3,7 @@ const jwtConfig = require("../config/jwtConfig");
 const argon2 = require("argon2"); // Import Argon2 basically pass encryption sathi use kartoy
 const { encrypt } = require("../utils/encryptionUtils");
 const calculateLitigantProfileCompletion = require("../utils/LitigantProfile/CalculateProfile");
+const Advocate = require("../models/advocate");
 // const { checkIfAadhaar } = require('../utils/AadharValidation/imagevalidate'); // Image validation utility
 
 // Add a new litigant (Signup)
@@ -170,9 +171,147 @@ const getLitigant = async (req, res) => {
   }
 };
 
+// Get paginated cases for a litigant with optional status filtering
+const getAllAdvocateByLitigant = async (req, res) => {
+  try {
+    // Check if user is authenticated
+    if (!req.user || !req.user.litigant_id) {
+      return res.status(403).json({ success: false, message: "Unauthorized access: user ID is required." });
+    }
+
+    // Get the litigant ID from req.user
+    const litigantId = req.user.litigant_id;
+
+    // Retrieve the litigant's location from the database
+    const litigant = await Litigant.findById(litigantId).select("litigant_location");
+    if (!litigant || !litigant.litigant_location) {
+      return res.status(404).json({ success: false, message: "Litigant location not found." });
+    }
+
+    // Extract pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+
+    // Extract filters from query parameters
+    const { name, rating, nearMe } = req.query;
+
+    // Build the filter object
+    let filter = {};
+
+    if (name) {
+      filter.fullName = { $regex: name, $options: 'i' }; // Case-insensitive search
+    }
+
+    if (rating) {
+      filter.rating = { $gte: rating }; // Assuming rating is stored in the advocate model
+    }
+
+    // Use the litigant's location from the retrieved litigant document
+    const litigantLocation = litigant.litigant_location.coordinates; // Expecting coordinates in [longitude, latitude] format
+
+    if (nearMe === "true") {
+      // Filter advocates within a 5 km radius of the litigant's location
+      filter.location = {
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: litigantLocation
+          },
+          $maxDistance: 5000 // 5 km radius
+        }
+      };
+
+      // Fetch advocates with pagination and filters
+      const advocates = await Advocate.find(filter)
+        .skip(skip)
+        .limit(limit)
+        .exec();
+
+      // Get total count of advocates matching the filter
+      const totalAdvocates = await Advocate.countDocuments(filter);
+      const totalPages = Math.ceil(totalAdvocates / limit);
+
+      // Response
+      return res.status(200).json({
+        success: true,
+        advocates,
+        pagination: {
+          totalAdvocates,
+          totalPages,
+          currentPage: page,
+          perPage: limit
+        }
+      });
+
+    } else {
+      // Fetch all advocates without the geospatial filter
+      const advocates = await Advocate.find(filter)
+        .skip(skip)
+        .limit(limit)
+        .exec();
+
+      // Calculate distance for each advocate from litigant's location
+      const advocatesWithDistance = advocates.map(advocate => {
+        const distance = calculateDistance(
+          litigantLocation[1], litigantLocation[0], // Litigant's latitude and longitude
+          advocate.location.coordinates[1], advocate.location.coordinates[0] // Advocate's latitude and longitude
+        );
+
+        return {
+          ...advocate.toObject(),
+          distance // Add distance in kilometers
+        };
+      });
+
+      // Sort by distance in ascending order
+      advocatesWithDistance.sort((a, b) => a.distance - b.distance);
+
+      // Get total count of advocates matching the filter
+      const totalAdvocates = await Advocate.countDocuments(filter);
+      const totalPages = Math.ceil(totalAdvocates / limit);
+
+      // Response
+      return res.status(200).json({
+        success: true,
+        advocates: advocatesWithDistance,
+        pagination: {
+          totalAdvocates,
+          totalPages,
+          currentPage: page,
+          perPage: limit
+        }
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Helper function to calculate distance between two geo-coordinates
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Radius of the Earth in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    0.5 - Math.cos(dLat) / 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    (1 - Math.cos(dLon)) / 2;
+
+  return R * 2 * Math.asin(Math.sqrt(a));
+}
+
+
+
+
+
+
+
+
 module.exports = {
   signup,
   completeProfile,
   authenticate,
   getLitigant,
+  getAllAdvocateByLitigant,
 };
