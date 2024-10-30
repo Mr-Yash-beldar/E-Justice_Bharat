@@ -7,6 +7,8 @@ yarn-error.log*
 # Environment variables
 .env
 
+#Api File
+E-Justice_Bharat_API.json
 # Logs
 logs/
 *.log
