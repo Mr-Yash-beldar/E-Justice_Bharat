@@ -1,7 +1,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { signup, completeProfile, authenticate,  getLitigant } = require('../controllers/litigantController');
+const { signup, completeProfile, authenticate,  getLitigant, getAllAdvocateByLitigant } = require('../controllers/litigantController');
 const { validateSignup, validateProfile } = require('../middlewares/validationMiddleware');
 const authenticateLitigant = require('../middlewares/authMiddleware');
 const  uploadFields  = require('../middlewares/uploadMiddleware');
@@ -20,6 +20,9 @@ router.post("/completeProfile", authenticateLitigant,validateProfile, completePr
 // router.get('/litigants', authenticateLitigant, getLitigants); // Assuming authentication required
 
 // Get specific litigant route
-router.get('/getDetails/', authenticateLitigant, getLitigant); // Either ID or email is required
+router.get('/getDetails', authenticateLitigant, getLitigant); // Either ID or email is required
+
+// Get All Advocate by Litigant
+router.get('/getAdvocates', authenticateLitigant, getAllAdvocateByLitigant); // Either ID or email is required
 
 module.exports = router;
