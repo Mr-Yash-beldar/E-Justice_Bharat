@@ -141,14 +141,17 @@ const getLitigant = async (req, res) => {
       return res.status(404).json({ error: "Litigant not found" });
     }
 
-    const completionPercentage = calculateLitigantProfileCompletion(litigant);
-    const profileStatus = completionPercentage === 100 ? 'completed' : 'not completed';
+    const profile = calculateLitigantProfileCompletion(litigant);
+    const completionPercentage = profile.completionPercentage;
+    const profileStatus = completionPercentage == 100 ? 'completed' : 'not completed';
+    const isCompleted = completionPercentage == 100;
 
     res.status(200).json({
       message: "Litigant Details",
       litigant,
       completionPercentage,
       profileStatus,
+      isCompleted,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
