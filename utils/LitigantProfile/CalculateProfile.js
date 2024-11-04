@@ -16,7 +16,6 @@ const calculateLitigantProfileCompletion = (litigant) => {
         'other_document',
         'litigant_preferred_language',
         'litigant_pincode',
-        'litigant_address',
     ];
 
     const missingFields = requiredFields.filter(field => !litigant[field]);
