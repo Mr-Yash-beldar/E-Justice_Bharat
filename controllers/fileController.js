@@ -30,7 +30,7 @@ const uploadProfile = async (req, res) => {
     const profileFile = req.files["profile_image"][0];
 
     // Log for debugging file type
-    console.log("Uploaded file mimetype:", profileFile.mimetype);
+    // console.log("Uploaded file mimetype:", profileFile.mimetype);
 
     // Check if the file is an image
     if (!profileFile.mimetype.startsWith("image/")) {
@@ -98,7 +98,7 @@ const uploadOtherDocument = async (req, res) => {
     const otherFile = req.files["other_document"][0];
 
     // Log for debugging file type
-    console.log("Uploaded file mimetype:", otherFile.mimetype);
+    // console.log("Uploaded file mimetype:", otherFile.mimetype);
 
     // Validate the file type (image or PDF)
     if (!(otherFile.mimetype.startsWith("image/") || otherFile.mimetype === "application/pdf")) {
