@@ -4,6 +4,7 @@ const argon2 = require("argon2"); // Import Argon2 basically pass encryption sat
 const { encrypt } = require("../utils/encryptionUtils");
 const calculateLitigantProfileCompletion = require("../utils/LitigantProfile/CalculateProfile");
 const Advocate = require("../models/advocate");
+const  calculateDistance  = require("../utils/GeoLocation/CalculateDistance");
 // const { checkIfAadhaar } = require('../utils/AadharValidation/imagevalidate'); // Image validation utility
 
 // Add a new litigant (Signup)
@@ -39,7 +40,6 @@ const signup = async (req, res) => {
       id: securedEncryptedId, // Send the encrypted ID in the response
     });
   } catch (err) {
-    console.error("Error in signup function:", err.message);
     res.status(500).json({ error: err.message });
   }
 };
@@ -55,7 +55,7 @@ const authenticate = async (req, res) => {
     if (
       !litigant ||
       !(await argon2.verify(litigant.litigant_password, litigant_password))
-    ) {
+    ) { 
       return res.status(401).json({ message: "Invalid credentials." });
     }
     if (!litigant.isVerified) { 
@@ -70,6 +70,7 @@ const authenticate = async (req, res) => {
     const payload = {
       litigant_id: litigant._id,
       email: litigant.litigant_email,
+      role: "litigant",
     };
 
     // Generate JWT token
@@ -171,136 +172,101 @@ const getLitigant = async (req, res) => {
   }
 };
 
-// Get paginated cases for a litigant with optional status filtering
+//finding all advocate by litigant
 const getAllAdvocateByLitigant = async (req, res) => {
   try {
-    // Check if user is authenticated
     if (!req.user || !req.user.litigant_id) {
       return res.status(403).json({ success: false, message: "Unauthorized access: user ID is required." });
     }
 
-    // Get the litigant ID from req.user
     const litigantId = req.user.litigant_id;
-
-    // Retrieve the litigant's location from the database
     const litigant = await Litigant.findById(litigantId).select("litigant_location");
     if (!litigant || !litigant.litigant_location) {
       return res.status(404).json({ success: false, message: "Litigant location not found." });
     }
 
-    // Extract pagination parameters
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
     const skip = (page - 1) * limit;
 
-    // Extract filters from query parameters
-    const { name, rating, nearMe } = req.query;
+    const { name, rating, nearMe, specialization,location } = req.query;
+    const litigantLocation = litigant.litigant_location.coordinates;
 
-    // Build the filter object
     let filter = {};
 
-    if (name) {
-      filter.fullName = { $regex: name, $options: 'i' }; // Case-insensitive search
+    if (specialization) {
+      filter.specialization = { $elemMatch: { $regex: new RegExp(specialization, "i") } };
     }
+
+    if (name) {
+      filter.fullName = { $regex: new RegExp(name, "i") };
+    }
+
+    if(location){
+      filter.place={ $regex:new RegExp(location,"i")};
+    }
+
+
 
     if (rating) {
-      filter.rating = { $gte: rating }; // Assuming rating is stored in the advocate model
+      filter.rating = { $gte: rating };
     }
-
-    // Use the litigant's location from the retrieved litigant document
-    const litigantLocation = litigant.litigant_location.coordinates; // Expecting coordinates in [longitude, latitude] format
 
     if (nearMe === "true") {
-      // Filter advocates within a 5 km radius of the litigant's location
       filter.location = {
-        $near: {
-          $geometry: {
-            type: "Point",
-            coordinates: litigantLocation
-          },
-          $maxDistance: 5000 // 5 km radius
+        $geoWithin: {
+          $centerSphere: [litigantLocation, 4000 / 6378.1] // 5 km radius
         }
       };
-
-      // Fetch advocates with pagination and filters
-      const advocates = await Advocate.find(filter)
-        .skip(skip)
-        .limit(limit)
-        .exec();
-
-      // Get total count of advocates matching the filter
-      const totalAdvocates = await Advocate.countDocuments(filter);
-      const totalPages = Math.ceil(totalAdvocates / limit);
-
-      // Response
-      return res.status(200).json({
-        success: true,
-        advocates,
-        pagination: {
-          totalAdvocates,
-          totalPages,
-          currentPage: page,
-          perPage: limit
-        }
-      });
-
-    } else {
-      // Fetch all advocates without the geospatial filter
-      const advocates = await Advocate.find(filter)
-        .skip(skip)
-        .limit(limit)
-        .exec();
-
-      // Calculate distance for each advocate from litigant's location
-      const advocatesWithDistance = advocates.map(advocate => {
-        const distance = calculateDistance(
-          litigantLocation[1], litigantLocation[0], // Litigant's latitude and longitude
-          advocate.location.coordinates[1], advocate.location.coordinates[0] // Advocate's latitude and longitude
-        );
-
-        return {
-          ...advocate.toObject(),
-          distance // Add distance in kilometers
-        };
-      });
-
-      // Sort by distance in ascending order
-      advocatesWithDistance.sort((a, b) => a.distance - b.distance);
-
-      // Get total count of advocates matching the filter
-      const totalAdvocates = await Advocate.countDocuments(filter);
-      const totalPages = Math.ceil(totalAdvocates / limit);
-
-      // Response
-      return res.status(200).json({
-        success: true,
-        advocates: advocatesWithDistance,
-        pagination: {
-          totalAdvocates,
-          totalPages,
-          currentPage: page,
-          perPage: limit
-        }
-      });
     }
+
+    const advocates = await Advocate.find(filter).exec();
+    const totalAdvocates = await Advocate.countDocuments(filter);
+    const totalPages = Math.ceil(totalAdvocates / limit);
+
+    // Calculate distance for each advocate and add it to the response
+    let advocatesWithDistance = advocates.map(advocate => {
+      const advocateLocation = advocate.location.coordinates;
+      const distance = calculateDistance(
+        litigantLocation[1], litigantLocation[0], // Litigant's latitude and longitude
+        advocateLocation[1], advocateLocation[0]  // Advocate's latitude and longitude
+      );
+
+      return {
+        // id autoincremenet
+        id: advocate._id,
+        name: advocate.fullName,
+        profilePicture: advocate.profileImage,
+        email: advocate.email,
+        mobile: advocate.mobileNumber,
+        state: advocate.state,
+        district: advocate.place,
+        gender: 'Male', // Assuming you want to return a 
+        language: advocate.status,
+        location: advocate.place, // Assuming you want the full location or specific fields from it
+        distance: distance.toFixed(2), // distance in kilometers, rounded to 2 decimal places
+        specialization: advocate.specialization[0],
+        ratings: 4.5 // Assuming you want to return a fixed rating for all advocates
+      };
+    });
+
+    // Sort advocates by distance in ascending order if nearMe is true
+    if (nearMe === "true") {
+      advocatesWithDistance.sort((a, b) => a.distance - b.distance);
+    }
+
+    // Apply pagination after sorting by distance
+    const paginatedAdvocates = advocatesWithDistance.slice(skip, skip + limit);
+
+    res.status(200).json({
+      success: true,
+      advocates: paginatedAdvocates,
+      pagination: { totalAdvocates, totalPages, currentPage: page, perPage: limit }
+    });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
-
-// Helper function to calculate distance between two geo-coordinates
-function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Radius of the Earth in kilometers
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a =
-    0.5 - Math.cos(dLat) / 2 +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    (1 - Math.cos(dLon)) / 2;
-
-  return R * 2 * Math.asin(Math.sqrt(a));
-}
-
 
 
 
