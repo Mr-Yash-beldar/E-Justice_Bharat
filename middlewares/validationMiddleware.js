@@ -10,12 +10,21 @@ const validateSignup = (req, res, next) => {
     return res.status(400).json({ error: 'All fields are required' });
   }
 
+  // check if name is valid
+  if (litigant_name && !/^[a-zA-Z\s]+$/.test(litigant_name)) {
+    return res.status(400).json({ error: 'Invalid name format. Name should contain only letters and spaces.' });
+  }
+
+  // check if email is valid
   if (!validator.isEmail(litigant_email)) {
     return res.status(400).json({ error: 'Invalid email format' });
   }
-  if (!validator.isMobilePhone(litigant_mob, 'any', { strictMode: false })) {
+  // check if phone number is valid
+  if (!validator.isMobilePhone(litigant_mob) || litigant_mob.length !== 10) {
     return res.status(400).json({ error: 'Invalid phone number format' });
   }
+
+  // check if password is matching
   if (litigant_password !== litigant_confirm_password) {
     return res.status(400).json({ error: 'Passwords do not match' });
   }
