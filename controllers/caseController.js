@@ -160,16 +160,16 @@ exports.getAllCasesByLitigant = async (req, res) => {
     const limit = parseInt(req.query.limit) || 5;
     const skip = (page - 1) * limit;
 
-    // Extract status filter if provided
-    const caseStatus = req.query.case_status;
+    // Extract status filter if provided, and split into an array
+    const caseStatus = req.query.case_status ? req.query.case_status.split(',') : [];
 
     const { litigant_id } = req.user; // Assuming req.user has been set by the authentication middleware
 
     // Define the filter criteria
     const filter = { litigantId: litigant_id }; // Filter by authenticated litigant
 
-    if (caseStatus) {
-      filter.case_status = caseStatus; // Apply status filter if provided
+    if (caseStatus.length > 0) {
+      filter.case_status = { $in: caseStatus }; // Apply status filter using $in for multiple statuses
     }
 
     // Fetch cases with pagination and filter
@@ -197,3 +197,4 @@ exports.getAllCasesByLitigant = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
