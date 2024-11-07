@@ -57,11 +57,11 @@ const verifyOtp = async (req, res) => {
         const otpEntry = await OTP.findOne({ userId: decryptedId, otp });
 
         if (!otpEntry) {
-            return res.status(400).json({ error: 'Invalid OTP.' });
+            return res.status(402).json({ error: 'Invalid OTP.' });
         }
 
         if (Date.now() > otpEntry.expiresAt) {
-            return res.status(400).json({ error: 'OTP has expired.' });
+            return res.status(405).json({ error: 'OTP has expired.' });
         }
 
         // Mark the user as verified
