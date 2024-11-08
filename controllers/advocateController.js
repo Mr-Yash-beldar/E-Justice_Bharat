@@ -3,6 +3,7 @@ const jwtConfig = require("../config/jwtConfig");
 const argon2 = require("argon2");
 const { encrypt } = require("../utils/encryptionUtils");
 const calculateAdvocateProfileCompletion = require("../utils/Profile/AdvocateComplete");
+const { formatDateToYYYYMMDD } = require('../utils/dateUtils');
 
 // Add a new advocate (Signup)
 const signup = async (req, res) => {
@@ -108,13 +109,13 @@ const completeProfile = async (req, res) => {
     }
 
     // Check for latitude and longitude in updates
-    if (updates.litigant_lat !== undefined && updates.litigant_long !== undefined) {
-      litigant.litigant_location = {
+    if (updates.advocate_lat !== undefined && updates.advocate_long !== undefined) {
+      advocate.advocate_location = {
         type: 'Point',
-        coordinates: [updates.litigant_long, updates.litigant_lat] // [longitude, latitude]
+        coordinates: [updates.advocate_long, updates.advocate_lat] // [longitude, latitude]
       };
-      delete updates.litigant_lat; // Remove lat from updates after processing
-      delete updates.litigant_long; // Remove long from updates after processing
+      delete updates.advocate_lat; // Remove lat from updates after processing
+      delete updates.advocate_long; // Remove long from updates after processing
     }
 
     // Update other fields dynamically, except restricted fields like _id or litigant_email
@@ -142,14 +143,12 @@ const completeProfile = async (req, res) => {
 const getAdvocate = async (req, res) => {
   // const { id, email } = req.params;
   //verify the user jwt token hearder and extract the id from it
-  const { advocate_id, email } = req.user;
+  const { advocate_id } = req.user;
 
   try {
     let advocate;
     if (advocate_id) {
       advocate = await Advocate.findById(advocate_id);
-    } else if (email) {
-      advocate = await Advocate.findOne({ email: email });
     } else {
       return res
         .status(400)
