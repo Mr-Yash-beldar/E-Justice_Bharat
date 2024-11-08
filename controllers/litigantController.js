@@ -211,9 +211,9 @@ const getAllAdvocateByLitigant = async (req, res) => {
     }
 
     if (nearMe === "true") {
-      filter.location = {
+      filter.advocate_location = {
         $geoWithin: {
-          $centerSphere: [litigantLocation, 4000 / 6378.1] // 5 km radius
+          $centerSphere: [litigantLocation, 400 / 6378.1] // 5 km radius
         }
       };
     }
@@ -224,7 +224,7 @@ const getAllAdvocateByLitigant = async (req, res) => {
 
     // Calculate distance for each advocate and add it to the response
     let advocatesWithDistance = advocates.map(advocate => {
-      const advocateLocation = advocate.location.coordinates;
+      const advocateLocation = advocate.advocate_location.coordinates;
       const distance = calculateDistance(
         litigantLocation[1], litigantLocation[0], // Litigant's latitude and longitude
         advocateLocation[1], advocateLocation[0]  // Advocate's latitude and longitude
@@ -234,16 +234,16 @@ const getAllAdvocateByLitigant = async (req, res) => {
         // id autoincremenet
         id: advocate._id,
         name: advocate.fullName,
-        profilePicture: advocate.profileImage,
+        profilePicture: advocate.profile_image,
         email: advocate.email,
         mobile: advocate.mobileNumber,
         state: advocate.state,
         district: advocate.place,
         gender: 'Male', // Assuming you want to return a 
-        language: advocate.status,
+        language: advocate.preferred_language,
         location: advocate.place, // Assuming you want the full location or specific fields from it
         distance: distance.toFixed(2), // distance in kilometers, rounded to 2 decimal places
-        specialization: advocate.specialization[0],
+        specialization: advocate.specialization,
         ratings: 4.5 // Assuming you want to return a fixed rating for all advocates
       };
     });
