@@ -10,7 +10,7 @@ const calculateAdvocateProfileCompletion = (advocate) => {
         'dateOfBirth',
         'specialization',
         'state',
-        'location',
+        'advocate_location',
         'place',
         'aadhar_document',
         'other_document',
