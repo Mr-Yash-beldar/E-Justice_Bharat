@@ -3,83 +3,89 @@
 const mongoose = require("mongoose");
 const argon2 = require("argon2");
 
-const advocateSchema = new mongoose.Schema({
-  advocateId: {
-    type: mongoose.Schema.Types.ObjectId,
-    auto: true
-  },
-  fullName: {
-    type: String,
-    required: [true, "Advocate name is required"]
-  },
-  email: {
-    type: String,
-    required: [true, "Email is required"],
-    unique: true,
-    lowercase: true,
-    match: [/\S+@\S+\.\S+/, 'Email format is invalid']
-  },
-  mobileNumber: {
-    type: String,
-    required: [true, "Mobile number is required"],
-    unique: true,
-    match: [/^\d{10}$/, 'Mobile number must be 10 digits']
-  },
-  password: {
-    type: String,
-    required: [true, "Password is required"]
-  },
-  barLicenseNumber: {
-    type: String,
-    required: [true, "Bar license number is required"],
-    unique: true
-  },
-  dateOfBirth: {
-    type: Date,
-    required: [true, "Date of birth is required"]
-  },
-  specialization: {
-    type: [String], // List of specializations for the advocate (e.g., "Criminal Law", "Civil Law")
-    required: true
-  },
-  location: {
-    type: {
-      type: String,
-      enum: ['Point'],
-      required: true
+const advocateSchema = new mongoose.Schema(
+  {
+    advocateId: {
+      type: mongoose.Schema.Types.ObjectId,
+      auto: true,
     },
-    coordinates: {
-      type: [Number],
-      required: true
-    }
+    fullName: {
+      type: String,
+      required: [true, "Advocate name is required"],
+    },
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      unique: true,
+      lowercase: true,
+      match: [/\S+@\S+\.\S+/, "Email format is invalid"],
+    },
+    mobileNumber: {
+      type: String,
+      unique: true,
+      match: [/^\d{10}$/, "Mobile number must be 10 digits"],
+    },
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+    },
+    barLicenseNumber: {
+      type: String,
+      required: [true, "Bar license number is required"],
+      unique: true,
+    },
+    dateOfBirth: {
+      type: Date,
+    },
+    specialization: {
+      type: [String], // List of specializations for the advocate (e.g., "Criminal Law", "Civil Law")
+    },
+    advocate_location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number],
+        required: true,
+      }
+    },
+    state: {
+      type: String,
+    },
+    place: {
+      type: String,
+    },
+    other_document: {
+      type: String,
+    },
+    aadhar_document: {
+      type: String,
+    },
+    profile_image: {
+      type: String,
+    },
+    preferred_language: {
+      type: String,
+    },
+    pincode: {
+      type: String,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false
   },
-  state: {
-    type: String,
-    required: [true, "State is required"]
   },
-  place: {
-    type: String,
-    required: [true, "Place is required"]
-  },
-  digitalSignature: {
-    type: String
-  },
-  profileImage: {
-    type: String
-  },
-  status: {
-    type: String,
-    enum: ['active', 'inactive', 'suspended'],
-    default: 'active'
-  }
-}, { timestamps: true });
+  { timestamps: true }
+);
 
 // Add a geospatial index to location
-advocateSchema.index({ location: '2dsphere' });
+advocateSchema.index({ location: "2dsphere" });
 
 // Password hashing middleware using Argon2
-advocateSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
+advocateSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
     return next();
   }
   try {
