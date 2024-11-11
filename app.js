@@ -2,6 +2,7 @@
 const express = require('express');
 const { connectDB, disconnectDB } = require('./config/db');  //database connection and disconnection
 const litigantRoutes = require('./routes/litigantRoutes'); // routes for litigants
+const advocateRoutes = require('./routes/advocateRoutes'); // routes for advocates
 const otpRoutes = require('./routes/otpRoutes'); // routes for otp
 const meetingRoutes = require("./routes/meetingRoutes"); //routes for meeting
 const caseRoutes = require('./routes/caseRoutes'); // routes for cases
@@ -19,14 +20,14 @@ app.use(express.json()); // Parse JSON bodies
 connectDB();
 
 app.use(cors({
-  origin: 'http://localhost:5173', // Allow specific frontend origin
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Define allowed methods
-  credentials: true, // Allow cookies if needed
+  origin: 'http://localhost:5173', // Your frontend's URL
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true, // Allow credentials if needed
 }));
-
 
 // routes and middleware
 app.use('/litigants', litigantRoutes); // Use litigant routes
+app.use('/advocates', advocateRoutes); // Use advocate routes
 app.use('/email', otpRoutes); // Use otp routes
 app.use("/ejusticeBharat/meeting", meetingRoutes); // Use meeting routes
 app.use('/cases', caseRoutes); // Use case routes
