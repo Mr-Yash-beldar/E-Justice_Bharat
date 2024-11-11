@@ -11,7 +11,6 @@ exports.addCase = async (req, res) => {
       filing_date,
       causeOfAction,
       urgency_level,
-      case_status,
       defendantName,
       defendantContactEmail,
       defendantContactPhone,
@@ -39,7 +38,7 @@ exports.addCase = async (req, res) => {
       litigantId: litigant_id, // Set litigantId from authenticated user
     });
 
-    return res.status(201).json({ success: true, case: newCase });
+    return res.status(201).json({ success: true, case: newCase ,message:"Case added successfully"});
   } catch (error) {
     return res.status(400).json({ success: false, message: error.message });
   }
