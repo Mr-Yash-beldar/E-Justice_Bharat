@@ -2,7 +2,7 @@ const Litigant = require("../models/litigant");
 const jwtConfig = require("../config/jwtConfig");
 const argon2 = require("argon2"); // Import Argon2 basically pass encryption sathi use kartoy
 const { encrypt } = require("../utils/encryptionUtils");
-const calculateLitigantProfileCompletion = require("../utils/LitigantProfile/CalculateProfile");
+const calculateLitigantProfileCompletion = require("../utils/Profile/LitigantComplete");
 const Advocate = require("../models/advocate");
 const  calculateDistance  = require("../utils/GeoLocation/CalculateDistance");
 // const { checkIfAadhaar } = require('../utils/AadharValidation/imagevalidate'); // Image validation utility
@@ -161,7 +161,7 @@ const getLitigant = async (req, res) => {
 
     res.status(200).json({
       message: "Litigant Details",
-      litigant,
+      user:litigant,
       completionPercentage,
       profileStatus,
       isCompleted,
