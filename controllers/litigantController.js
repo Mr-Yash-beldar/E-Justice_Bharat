@@ -135,14 +135,12 @@ const completeProfile = async (req, res) => {
 const getLitigant = async (req, res) => {
   // const { id, email } = req.params;
   //verify the user jwt token hearder and extract the id from it
-  const { id, email } = req.user;
+  const { litigant_id, email } = req.user;
 
   try {
     let litigant;
     if (id) {
       litigant = await Litigant.findById(id);
-    } else if (email) {
-      litigant = await Litigant.findOne({ litigant_email: email });
     } else {
       return res
         .status(400)
