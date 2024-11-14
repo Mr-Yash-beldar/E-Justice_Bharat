@@ -94,24 +94,49 @@ const completeProfile = async (req, res) => {
   const updates = req.body; // Fields to update from the request body
 
   try {
-    // Find and update advocate
-    const updatedAdvocate = await Advocate.findByIdAndUpdate(advocate_id, updates, { new: true });
-    if (!updatedAdvocate) {
-      return res.status(404).json({ message: "Advocate not found" });
+    // Find the litigant by ID
+    const advocate = await Advocate.findById(advocate_id);
+    if (!advocate) {
+      return res.status(404).json({ error: "Advocate not found" });
     }
 
-    // Calculate profile completion percentage
-    const completionPercentage = calculateAdvocateProfileCompletion(updatedAdvocate);
+    // Prevent updating the litigant email directly
+    if (updates.email) {
+      return res.status(400).json({
+        error: "Email cannot be updated.",
+      });
+    }
 
-    res.status(200).json({
-      message: "Profile updated successfully",
-      profileCompletion: `${completionPercentage}%`,
-      advocate: updatedAdvocate
+    // Check for latitude and longitude in updates
+    if (updates.litigant_lat !== undefined && updates.litigant_long !== undefined) {
+      litigant.litigant_location = {
+        type: 'Point',
+        coordinates: [updates.litigant_long, updates.litigant_lat] // [longitude, latitude]
+      };
+      delete updates.litigant_lat; // Remove lat from updates after processing
+      delete updates.litigant_long; // Remove long from updates after processing
+    }
+
+    // Update other fields dynamically, except restricted fields like _id or litigant_email
+    Object.keys(updates).forEach((key) => {
+      if (key !== "_id" && key !== "litigant_email") {
+        advocate[key] = updates[key];
+      }
     });
+
+    // Save the updated litigant profile
+    await advocate.save();
+
+    res.status(200).json({ message: "Profile updated successfully", advocate });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error updating advocate profile:", err);
+    res.status(500).json({
+      error:
+        "An error occurred while updating the profile. Please try again later.",
+    });
   }
 };
+
 
 // Get  advocate details
 const getAdvocate = async (req, res) => {
