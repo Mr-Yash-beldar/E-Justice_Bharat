@@ -36,9 +36,18 @@ const advocateSchema = new mongoose.Schema(
     },
     dateOfBirth: {
       type: Date,
+      set: function(value) {
+        console.log('Setting date:', value);
+        // Expecting input in 'dd-mm-yyyy' format, convert it to Date object
+        const [year, month, day] = value.split('-').map(Number);
+        return new Date(year, month - 1, day);
+      },
+      get: function(value) {
+        return value ? formatDateToDDMMYYYY(value) : value;
+      }
     },
     specialization: {
-      type: [String], // List of specializations for the advocate (e.g., "Criminal Law", "Civil Law")
+      type: String // List of specializations for the advocate (e.g., "Criminal Law", "Civil Law")
     },
     advocate_location: {
       type: {
@@ -104,5 +113,13 @@ advocateSchema.methods.comparePassword = async function (candidatePassword) {
     throw new Error("Password comparison failed");
   }
 };
+
+//// Helper function to format date to 'dd-mm-yyyy'
+function formatDateToDDMMYYYY(date) {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${year}-${month}-${day}`;
+}
 
 module.exports = mongoose.model("Advocate", advocateSchema);
