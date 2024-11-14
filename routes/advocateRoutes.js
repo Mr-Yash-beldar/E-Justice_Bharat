@@ -10,7 +10,7 @@ router.post("/signup", advocateController.signup);
 router.post("/authenticate", advocateController.authenticate);
 
 // Route for completing advocate profile (requires authentication)
-router.put("/complete-profile", verifyToken, advocateController.completeProfile);
+router.put("/completeProfile", verifyToken, advocateController.completeProfile);
 
 // Route for getting a list of all advocates
 router.get("/getDetails", verifyToken,advocateController.getAdvocate);
