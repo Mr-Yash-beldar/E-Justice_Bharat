@@ -8,7 +8,7 @@ const caseSchema = new mongoose.Schema(
     filing_date: { type: Date, required: true },
     causeOfAction: { type: String, required: true },
     urgency_level: { type: String, required: true },
-    case_status: { type: String,  default: "Filed" },
+    case_status: { type: String,  default: "filed" },
     defendantName: { type: String, required: true },
     defendantContactEmail: { type: String, required: true },
     defendantContactPhone: { type: String, required: true },
