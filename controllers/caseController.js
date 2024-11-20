@@ -105,8 +105,8 @@ exports.deleteCase = async (req, res) => {
 exports.updateCaseStatus = async (req, res) => {
   try {
     const caseId = req.params.caseId;
-    console.log("Updating case with ID:", caseId);
-    console.log("New case status:", req.body.case_status);
+    // console.log("Updating case with ID:", caseId);
+    // console.log("New case status:", req.body.case_status);
 
     const updatedCase = await Case.findByIdAndUpdate(
       caseId,
@@ -121,8 +121,8 @@ exports.updateCaseStatus = async (req, res) => {
         .json({ success: false, message: "Case not found" });
     }
 
-    console.log("Updated case:", updatedCase);
-    return res.json({ success: true, case: updatedCase });
+    // console.log("Updated case:", updatedCase);
+    return res.json({ success: true, case: updatedCase,message:"Case Has Been Accepted" });
   } catch (error) { 
     console.error("Error updating case status:", error.message);
     return res.status(400).json({ success: false, message: error.message });
