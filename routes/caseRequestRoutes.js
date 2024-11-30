@@ -12,6 +12,8 @@ router.put("/applyFees/:requestId",verifyAuthToken, caseRequestController.update
 // Get all requests by a specific litigant
 router.get("/getAll/", verifyAuthToken,caseRequestController.getAdvocateRequests);
 
+router.get("/getAllpre/", verifyAuthToken,caseRequestController.getLitigantRequests);
+
 //getdate of pretrial
 router.post("/getDate/",caseRequestController.getRequestsByCaseId);
 
