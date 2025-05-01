@@ -1,27 +1,33 @@
 const express = require('express');
-const { connectDB, disconnectDB } = require('./config/db'); // database connection and disconnection
-const litigantRoutes = require('./routes/litigantRoutes'); // routes for litigants
-const advocateRoutes = require('./routes/advocateRoutes'); // routes for advocates
-const otpRoutes = require('./routes/otpRoutes'); // routes for OTP
-const meetingRoutes = require("./routes/meetingRoutes"); // routes for meetings
-const caseRoutes = require('./routes/caseRoutes'); // routes for cases
-const authRoutes = require('./routes/authRoutes'); // routes for authentication
-const fileRoutes = require('./routes/fileRoutes'); // routes for file uploads
-const caseRequestRoutes = require('./routes/caseRequestRoutes'); // routes for case requests
-const cors = require('cors'); // Import cors
+const cors = require('cors');
+
+const { connectDB, disconnectDB } = require('./config/db');
+const litigantRoutes = require('./routes/litigantRoutes');
+const advocateRoutes = require('./routes/advocateRoutes');
+const otpRoutes = require('./routes/otpRoutes');
+const meetingRoutes = require("./routes/meetingRoutes");
+const caseRoutes = require('./routes/caseRoutes');
+const authRoutes = require('./routes/authRoutes');
+const fileRoutes = require('./routes/fileRoutes');
+const caseRequestRoutes = require('./routes/caseRequestRoutes');
 
 const app = express();
+connectDB();
 
 // Middleware to parse request bodies
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// Connect to database
-connectDB();
+const allowedOrigins = ['http://localhost:5173', 'https://e-justice-bharat.vercel.app'];
 
-// CORS Middleware
 const corsOptions = {
-  origin: ['http://localhost:5173', 'https://e-justice-bharat.vercel.app'],
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -38,13 +44,10 @@ app.use((req, res, next) => {
   next();
 });
 
-
+// Apply CORS
 app.use(cors(corsOptions));
 
-// Explicitly handle OPTIONS requests for preflight
-app.options('*', cors(corsOptions));
-
-// Routes and middleware
+// Routes
 app.use('/litigants', litigantRoutes);
 app.use('/advocates', advocateRoutes);
 app.use('/email', otpRoutes);
@@ -54,18 +57,14 @@ app.use('/auth', authRoutes);
 app.use("/files", fileRoutes);
 app.use("/request", caseRequestRoutes);
 
-// Root endpoint
-app.get('/', (req, res) => {
-  res.send('Welcome to eJustice Bharat');
-});
+app.get('/', (req, res) => res.send('Welcome to eJustice Bharat'));
 
-// Graceful shutdown on SIGINT
+// Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('SIGINT signal received: closing MongoDB connection');
   await disconnectDB();
   process.exit(0);
 });
 
-// Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
