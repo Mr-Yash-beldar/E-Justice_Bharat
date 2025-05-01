@@ -21,10 +21,10 @@ connectDB();
 
 // CORS Middleware
 const corsOptions = {
-  origin: 'http://localhost:5173', // Frontend URL
-  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+  origin: ['http://localhost:5173', 'https://e-justice-bharat.vercel.app'],
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization'], // Include Authorization header
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 app.use(cors(corsOptions));
