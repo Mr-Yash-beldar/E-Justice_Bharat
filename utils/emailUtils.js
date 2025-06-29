@@ -15,12 +15,13 @@ const sendVerificationEmail = async (to, otp, subject) => {
         const templatePath = path.join(__dirname, '../templates/otpTemplate.ejs');
         const html = await ejs.renderFile(templatePath, { otp, subject });
 
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to,
-            subject,
-            html,
-        };
+   const mailOptions = {
+    from: `"EJusticeBharat" <${process.env.EMAIL_USER}>`,
+    to,
+    subject,
+    html,
+};
+
 
         await transporter.sendMail(mailOptions);
     } catch (err) {
