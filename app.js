@@ -10,6 +10,7 @@ const caseRoutes = require('./routes/caseRoutes');
 const authRoutes = require('./routes/authRoutes');
 const fileRoutes = require('./routes/fileRoutes');
 const caseRequestRoutes = require('./routes/caseRequestRoutes');
+const globalErrorHandler = require('./middlewares/globalErrorHandler');
 
 const app = express();
 connectDB();
@@ -57,7 +58,9 @@ app.use('/auth', authRoutes);
 app.use("/files", fileRoutes);
 app.use("/request", caseRequestRoutes);
 
+app.use(globalErrorHandler);
 app.get('/', (req, res) => res.send('Welcome to eJustice Bharat'));
+
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
