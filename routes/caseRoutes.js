@@ -13,7 +13,7 @@ router.put('/update/:caseId', verifyAuthToken, caseController.updateCase);
 router.delete('/delete/:caseId', verifyAuthToken, caseController.deleteCase);
 
 // Route for updating case status
-router.patch('/updateStatus/:caseId', verifyAuthToken, caseController.updateCaseStatus);
+router.put('/updateStatus/:caseId', verifyAuthToken, caseController.updateCaseStatus);
 
 // Route for getting case details
 router.get('/:caseId', verifyAuthToken, caseController.getCaseDetails);
