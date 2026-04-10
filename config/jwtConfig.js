@@ -1,18 +1,19 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
-// Load environment variables from a .env file
-require('dotenv').config();
+require("dotenv").config();
 
 const jwtConfig = {
-  secret: process.env.JWT_SECRET , // Use environment variable or fallback to a default secret
-  expiresIn: '24h', // Token expiration time, 
+  secret: process.env.JWT_SECRET,
+  expiresIn: "24h",
 
-  // Method to sign a token
+  //  sign a token
   signToken: (payload) => {
-    return jwt.sign(payload, jwtConfig.secret, { expiresIn: jwtConfig.expiresIn });
+    return jwt.sign(payload, jwtConfig.secret, {
+      expiresIn: jwtConfig.expiresIn,
+    });
   },
 
-  // Method to verify a token
+  //  verify a token
   verifyToken: (token) => {
     return new Promise((resolve, reject) => {
       jwt.verify(token, jwtConfig.secret, (err, decoded) => {
