@@ -29,14 +29,14 @@ const signup = async (req, res) => {
     }
 
     // Hash the password using Argon2
-    const hashedPassword = await argon2.hash(password);
-
+    // Note: The Advocate model's pre-save hook also hashes the password,
+    // so we pass the plain password here and let the model handle hashing.
     const advocate = new Advocate({
       fullName,
       barLicenseNumber,
       email,
       mobileNumber,
-      password: hashedPassword
+      password
     });
 
     // Encrypt the advocate ID
@@ -62,7 +62,7 @@ const authenticate = async (req, res) => {
     // console.log(advocate);
 
     // If advocate is not found or password is incorrect
-    if (!advocate || !(argon2.verify(advocate.password, password))) {
+    if (!advocate || !(await argon2.verify(advocate.password, password))) {
 
       return res.status(401).json({ message: "Invalid credentials." });
     }
